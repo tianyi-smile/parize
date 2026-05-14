@@ -1,8 +1,8 @@
 #import "../lib.typ": *
+
+
 #import "@preview/layout-ltd:0.1.0": *
-// For Paragraph Indentation: <= 3
-// For Paragraph Spacing: <= 4
-#show: layout-limiter.with(max-iterations: 4)
+#show: layout-limiter.with(max-iterations: 3)
 
 #[
   #set page(height: auto)
