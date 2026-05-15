@@ -203,7 +203,7 @@ Demo two:
   ![Example of paragraph indentation: showing how text remains unindented when following a block-level element without an empty line](asserts/simple-indent.png)
 
   ```typst
-    #import "@preview/parize:0.2.0": par-indent
+  #import "@preview/parize:0.2.0": par-indent
   #set page(width: 12cm, margin: 1cm, height: auto)
   #show: par-indent.with(include-elem: (list, enum, terms, math.equation))
   #let test-unindent = [
@@ -851,7 +851,7 @@ Default: `false` (feature disabled). Setting `use-par-leading: true` is equivale
   )
   ```
 - **Caution**: Avoid `use-par-leading: (apply-elem: "all")`, which may disrupt packages relying on Typst's existing paragraph model.
-- **Basic Elements**: `block`, `pad`, `grid`, `stack` are not supported directly; if you want `par.leading` control for them, wrap them in `parize-block`.
+- **Basic Elements**: `block`, `pad`, `grid`, `stack` and `layout` are not supported directly; if you want `par.leading` control for them, wrap them in `parize-block`.
   
   <details>
   <summary>Example:</summary>
