@@ -558,14 +558,14 @@
           radius: 0pt,
         )
         let hanging = if text.dir == rtl { (right: it.hanging-indent) } else { (left: it.hanging-indent) }
-        set text(fill: blue) // debug
+        // set text(fill: blue) // debug
         [#pad(rest: 0pt, [#h(-it.hanging-indent)#it.body], ..hanging)#prevent-recursion-label]
       } else {
         it
       }
     } else {
       if par-type in (ParType.parbreak-indented, ParType.non-tight-list-parbreak) {
-        set text(fill: red) // debug
+        // set text(fill: red) // debug
         par(first-line-indent: (amount: amount, all: true))[#it.body]
       } else {
         it
