@@ -1,7 +1,7 @@
 The `parize` package provides an experimental feature that allows any block-level element in Typst to be treated as part of a paragraph.
 
-Demo one:
-![Demo one: showing how block-level elements are treated as part of a paragraph](asserts/demo.png)
+Example One:
+![Example: showing how block-level elements are treated as part of a paragraph](asserts/demo.png)
   <details>
   <summary>Code:</summary>
 
@@ -118,9 +118,9 @@ Demo one:
   </details>
 
 
-Demo two:
+Example Two:
 
-![Demo two: showing how block-level elements are treated as part of a paragraph](asserts/demo2.png)
+![Example: showing how `math.equation` are treated as part of a paragraph](asserts/demo2.png)
 
 <details>
 <summary>Code:</summary>
@@ -190,6 +190,10 @@ Demo two:
 ```
 
 </details>
+
+
+- See [ex-in-elems-test.typ](tests/ex-in-elems-test.typ) for details on using `par-indent` with the `rect` element when `Paragraph Indentation` or `Paragraph Spacing` is enabled.
+- See also [inlinable-block.pdf](examples/inlinable-block.pdf) ([source](examples/inlinable-block.typ)) for details on using `par-indent` with custom block-level containers that can be treated as part of a paragraph.
 
 ## Features
 
@@ -454,7 +458,7 @@ In `touying`, you can define a custom `par-indent-slide` method:
 
     #lorem(2)
   ]
-  #lorem(2) no-indent // Here, paragraph is not indented due to `par-indent` applying to the element `figure`.
+  #lorem(2) unindented // Here, paragraph is not indented due to `par-indent` applying to the element `figure`.
 
   #theorem[
     #lorem(2)
@@ -464,7 +468,7 @@ In `touying`, you can define a custom `par-indent-slide` method:
     #lorem(2)
   ]
 
-  #lorem(2) indent
+  #lorem(2) indented
 ]
 ```
 
@@ -734,7 +738,7 @@ The `use-par-leading` parameter accepts a dictionary with the following keys:
 
 Values for these keys can be:
 - `array` whose elements are the following block-level elements:
-  - `figure`, `layout`
+  - `figure`,
   - `list`, `enum`, `terms`
   - `heading`, `title`, `outline`, `repeat`
   - `table`, `columns`
@@ -838,18 +842,18 @@ Default: `false` (feature disabled). Setting `use-par-leading: true` is equivale
 ### Notes
 
 - **Native Typst Behavior**: For block-level elements, if `block.above` is `auto` and the preceding line is text or another block-level element with `block.below: auto`, Typst inserts `par.spacing`. `parize` allows using `par.leading` instead when no empty line exists. Otherwise, spacing follows the minimum of `block.above` and the previous element's `block.below` (`auto` treated as `0pt`), and `parize` does not intervene.
-- **Special Elements**: For `heading`, `title`, `quote`, default `block.above` and `block.below` are not `auto`, so `parize` doesn't affect their spacing by default. To include them, use:
-  ```typst
-  #show quote.where(block: true): set block(spacing: auto)
-  #show heading: set block(spacing: auto)
-  #show title: set block(spacing: auto)
-  // ...
-  #show : par-indent.with(
-    use-par-leading: (
-      apply-elem: (quote, heading, title, /*other elements*/)
+  - In particular, for `heading`, `title`, `quote`, since the default of `block.above` and `block.below` are not `auto`, so `parize` doesn't affect their spacing by default. To include them, use:
+    ```typst
+    #show quote.where(block: true): set block(spacing: auto)
+    #show heading: set block(spacing: auto)
+    #show title: set block(spacing: auto)
+    // ...
+    #show : par-indent.with(
+      use-par-leading: (
+        apply-elem: (quote, heading, title, /*other elements*/)
+      )
     )
-  )
-  ```
+    ```
 - **Caution**: Avoid `use-par-leading: (apply-elem: "all")`, which may disrupt packages relying on Typst's existing paragraph model.
 - **Basic Elements**: `block`, `pad`, `grid`, `stack` and `layout` are not supported directly; if you want `par.leading` control for them, wrap them in `parize-block`.
   
@@ -907,10 +911,112 @@ Default: `false` (feature disabled). Setting `use-par-leading: true` is equivale
 
 - **List Elements**: When using `block-block-leading` for lists (e.g., `use-par-leading: (block-block-leading: (list, enum, terms, ))`), we ignore Typst's [PR#6242](https://github.com/typst/typst/pull/6242) to maintain consistent paragraph semantics (i.e., compatible with <0.14, not ≥0.14). This ensures the `spacing` parameter in lists controls only inter-item spacing, not spacing between the list and preceding text.
   - The native list model is limited, with only one `spacing` parameter for both top and bottom margins.
-  - Consider using the `itemize` package for enhanced list/enum functionality.
+  - Consider using the `itemize` (≥0.3.0) package for enhanced list/enum functionality.
+
+
+## Custom block-level container
+
+If you want a custom block-level container to have paragraph spacing and paragraph indentation properties (i.e., to be treated as part of a paragraph), you can mark it with `parize-par-above-flag` and `parize-par-below-flag` before and after the container. When users apply `parize` to `block`, such containers will be processed as part of a paragraph. Alternatively, you can mark block-level elements with `parize-prevention-label` so that `parize` does not process them.
+
+See [inlinable-block.pdf](examples/inlinable-block.pdf) ([source](examples/inlinable-block.typ)) for more details.
+
+## Show-Rule Order
+
+Suppose an element is overridden by `show elem: ...`. If you want `par-indent` to apply to the **overridden** element, generally you should place `show elem: ...` **after** `show: par-indent`.
+
+<details>
+<summary>Example:</summary>
+
+```typst
+#import "@preview/parize:0.2.0": par-indent
+#set page(width: 12cm, margin: 1cm, height: auto)
+
+#[
+  #show "Test figure": set text(fill: red) // debug
+  #show "par-spacing": set text(fill: blue) // debug
+  #show "par-leading": set text(fill: green) // debug
+
+  #set par(first-line-indent: (amount: 2em, all: false), spacing: 1.5em)
+  #table(
+    columns: (1fr,) * 2,
+    [
+      #show: par-indent.with(
+        include-elem: (block,),
+        use-par-leading: (
+          block-text-leading: (block,),
+          text-block-leading: (block, figure),
+        ),
+      )
+
+      #show figure: it => it.body
+
+      // `par-indent` receives `figure.body`, so it applies to `block`'s rules
+
+      #lorem(6) par-leading
+      #figure()[
+        #parize-par-above-flag
+        Test figure
+        #parize-par-below-flag
+      ]<fig:test1>
+      unindented + par-leading #lorem(2)
+
+      Ref test: @fig:test1.
+
+      #lorem(5) par-spacing
+
+      #figure()[
+        #parize-par-above-flag
+        Test figure
+        #parize-par-below-flag
+      ]
+
+      unindented + par-spacing #lorem(2)
+
+    ],
+    [
+      #show figure: it => it.body
+
+      #show: par-indent.with(
+        include-elem: (block,),
+        use-par-leading: (
+          block-text-leading: (block,),
+          text-block-leading: (block, figure),
+        ),
+      )
+
+      // `par-indent` recognizes `figure` as a block-level element, so it applies to `figure`'s rules
+
+      #lorem(6) par-leading
+      #figure()[
+        #parize-par-above-flag
+        Test figure
+        #parize-par-below-flag
+      ]<fig:test2>
+      unindented + par-spacing #lorem(2)
+
+      Ref test: @fig:test2.
+
+      #lorem(5) par-spacing
+
+      #figure()[
+        #parize-par-above-flag
+        Test figure
+        #parize-par-below-flag
+      ]
+
+      unindented + par-spacing #lorem(5)
+    ],
+  )
+]
+```
+
+![Show-Rule Order: explains how `par-indent` processes elements in the order of `show` rules](asserts/show-rule-order.png)
+
+</details>
 
 ## Limitations
 
 - **Version Compatibility**: Supports Typst 0.13.0–0.14.2 only; may be incompatible with future versions (particularly [PR#7931](https://github.com/typst/typst/pull/7931)).
+
 
 - **Convergence Behavior**: Usually, `par-indent` needs at least 3 iterations to converge fully, but at most 4 iterations.

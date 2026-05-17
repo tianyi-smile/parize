@@ -7,7 +7,7 @@
 #let parize-block-label = label("__cdl_parize_block_flag__")
 
 /// If you do not want certain elements to be processed by `par-indent`, you can use this label to mark them.
-#let prevent-recursion-label = label("__cdl_prevent-label__")
+#let prevent-recursion-label = label("__cdl_parize_prevent-label__")
 
 /// A marker placed below a paragraph to signal that the following block should be
 /// spaced with `par.leading` (no empty line between them).
@@ -114,12 +114,6 @@
     )#v-block-label]
 }
 
-/// Selector for block elements marked with the parize-block-label.
-///
-/// This selector identifies block elements that have been processed by the parize system
-/// and marked with the `parize-block-label`. These blocks are treated specially in
-/// paragraph spacing calculations.
-#let sel-parize-block = selector(block.where(label: parize-block-label))
 
 /// State variable to track nested usage of `par-indent`.
 #let nested-state = state("__cdl_nested_state__", false)
@@ -189,11 +183,11 @@
 #let verify-args(exclude-elem, include-elem, use-par-leading) = {
   assert(
     type(exclude-elem) == array,
-    message: "The value of `exclude-elem` should be an array; but find: " + repr(exclude-elem) + ".",
+    message: "The type of `exclude-elem` should be an array; but find: " + str(type(exclude-elem)) + ".",
   )
   assert(
     type(include-elem) == array,
-    message: "The value of `include-elem` should be an array; but find: " + repr(include-elem) + ".",
+    message: "The type of `include-elem` should be an array; but find: " + str(type(include-elem)) + ".",
   )
 
   let assert-elem(elems, supported-elems) = if type(elems) == array {
@@ -206,6 +200,8 @@
       }
     }
     (result == none, unsuppted-elem)
+  } else {
+    panic("Expected an array; but find: " + str(type(elems)) + ".")
   }
 
   let _exclude-elem = ()
@@ -260,6 +256,32 @@
       if block-text-leading == "all" {
         block-text-leading = leading-elem
       }
+
+      assert(
+        type(apply-elem) == array,
+        message: "The type of `apply-elem` should be an array; but find: " + str(type(apply-elem)) + ".",
+      )
+
+      assert(
+        type(block-block-leading) == array,
+        message: "The type of `block-block-leading` should be an array; but find: "
+          + str(type(block-block-leading))
+          + ".",
+      )
+      assert(
+        type(text-block-leading) == array,
+        message: "The type of `text-block-leading` should be an array; but find: "
+          + str(type(text-block-leading))
+          + ".",
+      )
+      assert(
+        type(block-text-leading) == array,
+        message: "The value of `block-text-leading` should be an array; but find: "
+          + str(repr(block-text-leading))
+          + ".",
+      )
+
+
       // block-text-leading.map(e => if e == layout {
       //   func-layout
       // } else { e })
@@ -348,7 +370,7 @@
 ///     - `apply-elem` (array, "all"): Specifies which block-level elements to process, affecting `block-text-leading`, `text-block-leading`, and `block-block-leading`.
 ///    - Values for these keys can be:
 ///     - `array` whose elements are the following block-level elements:
-///       - `figure`, `layout`
+///       - `figure`
 ///       - `list`, `enum`, `terms`
 ///       - `heading`, `title`, `outline`, `repeat`
 ///       - `table`, `columns`
@@ -357,7 +379,7 @@
 ///       - `curve`, `image`, `line`, `polygon`
 ///       - `math.equation`, `raw`, `quote`
 ///       - `block` (for `parize`'s `parize-block`)
-///       - Note that: `block`, `pad`, `grid`, `stack` are not supported directly; wrap them in `parize-block`.
+///       - Note that: `block`, `pad`, `grid`, `stack` and `layout` are not supported directly; wrap them in `parize-block`.
 ///     - `"all"`: applies to all block-level elements listed above
 /// -> content: The processed document content.
 #let par-indent(doc, exclude-elem: (), include-elem: (), use-par-leading: false) = {
@@ -401,7 +423,7 @@
   }
 
   show block: it => {
-    if it.body == auto or it.has("label") and it.label == v-block-label {
+    if it.body == auto or it.has("label") and it.label in (v-block-label, prevent-recursion-label) {
       return it
     }
     let is-parize-block = it.has("label") and it.label == parize-block-label
@@ -456,7 +478,6 @@
 
   show all-block-level-sel: it => {
     if it.has("label") and it.label == prevent-recursion-label {
-      // only for pad
       return it
     }
 
@@ -514,7 +535,7 @@
         }
       } else {
         if is-parred-elem {
-          par-type-state.update(update-dic(dic: (par-type: ParType.block-indent, below: block.below) + tight))
+          par-type-state.update(update-dic(dic: (par-type: ParType.block-indent, below: block.below, elem: e) + tight))
         } else {
           // should need? users may override the element
           par-type-state.update(update-dic(dic: (par-type: ParType.block-none, below: block.below) + tight))
@@ -558,15 +579,20 @@
           radius: 0pt,
         )
         let hanging = if text.dir == rtl { (right: it.hanging-indent) } else { (left: it.hanging-indent) }
+        let fields = it.fields()
+        let body = fields.remove("body")
+        set par(..fields)
         // set text(fill: blue) // debug
-        [#pad(rest: 0pt, [#h(-it.hanging-indent)#it.body], ..hanging)#prevent-recursion-label]
+        [#pad(rest: 0pt, [#h(-it.hanging-indent)#body], ..hanging)#prevent-recursion-label]
       } else {
         it
       }
     } else {
       if par-type in (ParType.parbreak-indented, ParType.non-tight-list-parbreak) {
+        let fields = it.fields()
+        let body = fields.remove("body")
         // set text(fill: red) // debug
-        par(first-line-indent: (amount: amount, all: true))[#it.body]
+        par(..fields, first-line-indent: (amount: amount, all: true))[#body]
       } else {
         it
       }

@@ -2,7 +2,6 @@
 #set page(width: 12cm, margin: 1cm, height: auto)
 #set par(first-line-indent: (amount: 2em, all: true), spacing: 1.5em)
 
-
 #[
   #set block(stroke: red) // debug
   #show: par-indent
@@ -37,7 +36,7 @@
 
     #lorem(2)
   ]
-  #lorem(2) no-indent // Here, paragraph is not indented due to `par-indent` applying to the element `figure`.
+  #lorem(2) unindented // Here, paragraph is not indented due to `par-indent` applying to the element `figure`.
 
   #theorem[
     #lorem(2)
@@ -47,5 +46,5 @@
     #lorem(2)
   ]
 
-  #lorem(2) indent
+  #lorem(2) indented
 ]

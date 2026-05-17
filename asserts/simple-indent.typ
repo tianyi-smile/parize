@@ -1,6 +1,7 @@
+#import "../lib.typ": *
+#set page(width: 12cm, margin: 1cm, height: auto)
+
 #[
-  #import "../src/parize.typ": par-indent
-  #set page(width: 12cm, margin: 1cm, height: auto)
   #show: par-indent.with(include-elem: (list, enum, terms, math.equation))
   #let test-unindent = [
     #lorem(2)

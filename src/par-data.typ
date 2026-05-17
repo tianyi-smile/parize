@@ -14,7 +14,10 @@
 /// ParType state
 /// - data: par-type (ParType), below (tract the below spacing of block-level elements), tight (track the tightness of lists), n (the current number of items in the lists), count (the total number of items in the lists)
 /// - backup: backup data (used for `place` and `figure.placement != none`)
-#let par-type-state = state("__cdl_par_type__", (data: (par-type: ParType.native), backup: ()));
+#let par-type-state = state("__cdl_parize_par_type__", (data: (par-type: ParType.native), backup: ()));
+
+/// For debug: It contains the information of the current paragraph state
+#let parize-debug = context par-type-state.get()
 
 /// Update par-type state
 #let update-dic(dic: (:), backup: false) = it => {

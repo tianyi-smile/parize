@@ -29,8 +29,6 @@
   `exclude par-indent for `rect` and par-leading for `rect` with rect's block.spacing == auto`
 
   #block[
-
-
     *Indented* #lorem(8) *par.spacing*
 
     #rect()
@@ -45,10 +43,8 @@
 
 
   `#show rect: set block(spacing: 1em)`
+  #show rect: set block(spacing: 1em)
   #block[
-
-    #show rect: set block(spacing: 1em)
-
     *Indented* #lorem(8) *spacing: 1em*
     #rect()
     *Indented + spacing: 1em* #lorem(8)
@@ -95,10 +91,8 @@
   ]
 
   `#show rect: set block(spacing: 1em)`
-
+  #show rect: set block(spacing: 1em)
   #block[
-    #show rect: set block(spacing: 1em)
-
     *UnIndented* #lorem(8) *spacing: 1em*
     #rect()
     *UnIndented + spacing: 1em* #lorem(8)

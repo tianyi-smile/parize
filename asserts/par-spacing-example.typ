@@ -44,7 +44,7 @@
       + #lorem(2)
 
       - #lorem(2)
-
+      
       #lorem(2)
     ],
   )
