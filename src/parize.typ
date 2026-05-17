@@ -535,7 +535,7 @@
         }
       } else {
         if is-parred-elem {
-          par-type-state.update(update-dic(dic: (par-type: ParType.block-indent, below: block.below, elem: e) + tight))
+          par-type-state.update(update-dic(dic: (par-type: ParType.block-indent, below: block.below) + tight))
         } else {
           // should need? users may override the element
           par-type-state.update(update-dic(dic: (par-type: ParType.block-none, below: block.below) + tight))
