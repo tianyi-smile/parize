@@ -21,17 +21,15 @@
 
 /// Update par-type state
 #let update-dic(dic: (:), backup: false) = it => {
-  if backup == auto {
+  if backup == false {
+    it.data = dic
+  } else if backup == auto {
     // recover, used for `place` and `figure.placement != none`
     it.data = it.backup.pop()
-  } else {
-    if backup == true {
-      // restore, used for `place` and `figure.placement != none`
-      it.backup.push(it.data)
-      it.data = (par-type: ParType.native)
-    } else {
-      it.data = dic
-    }
+  } else if backup == true {
+    // restore, used for `place` and `figure.placement != none`
+    it.backup.push(it.data)
+    it.data = (par-type: ParType.native)
   }
   return it
 }
